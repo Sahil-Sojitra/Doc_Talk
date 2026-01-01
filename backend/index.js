@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const documentRoutes = require('./routes/document');
 dotenv.config();
 
 const app = express();
@@ -22,6 +23,28 @@ mongoose.connect(process.env.MONGODB_URL)
 // Sample route
 app.get("/api/health", (req, res) => {
     res.status(200).json({ status: "OK", message: "Server running" });
+});
+
+app.use('/api/documents', documentRoutes);
+
+// Centralized error handler (including Multer/file upload errors)
+app.use((err, req, res, next) => {
+    if (!err) return next();
+
+    // Multer errors
+    if (err.name === 'MulterError') {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(413).json({ message: 'File too large. Max size is 10MB.' });
+        }
+        return res.status(400).json({ message: err.message || 'File upload error' });
+    }
+
+    // Custom invalid file type error (from fileFilter)
+    if (err.code === 'INVALID_FILE_TYPE' || err.message === 'Only PDF files are allowed') {
+        return res.status(400).json({ message: 'Only PDF files are allowed' });
+    }
+
+    return res.status(500).json({ message: err.message || 'Internal server error' });
 });
 
 // Start server
