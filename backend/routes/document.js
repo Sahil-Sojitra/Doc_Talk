@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
-
 const upload = require("../middlewares/multer");
+const auth = require("../middlewares/auth");
+
 const {
     uploadDocument,
     getDocuments,
@@ -9,29 +10,21 @@ const {
     deleteDocument
 } = require("../controllers/document");
 
-// Helper to make sure req.file is populated even if the client uses a different field name
-const ensureSingleFile = (req, res, next) => {
-    if (req.file) return next();
-    if (Array.isArray(req.files) && req.files.length > 0) {
-        req.file = req.files[0];
-    }
-    next();
-};
 
 router.post(
     "/upload",
-    upload.any(),
-    ensureSingleFile,
+    auth,
+    upload.any(), // accept up to 10 files at once
     uploadDocument
 );
 
 
-router.get("/", getDocuments);
+router.get("/", auth, getDocuments);
 
 
-router.get("/:id", getDocumentById);
+router.get("/:id", auth, getDocumentById);
 
 
-router.delete("/:id", deleteDocument);
+router.delete("/:id", auth, deleteDocument);
 
 module.exports = router;

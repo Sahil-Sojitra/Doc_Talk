@@ -4,6 +4,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const documentRoutes = require('./routes/document');
+const authRoutes = require('./routes/auth');
 dotenv.config();
 
 const app = express();
@@ -26,9 +27,11 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use('/api/documents', documentRoutes);
+app.use('/api/auth', authRoutes);
 
 // Centralized error handler (including Multer/file upload errors)
 app.use((err, req, res, next) => {
+    console.error('[ERROR]', err);
     if (!err) return next();
 
     // Multer errors

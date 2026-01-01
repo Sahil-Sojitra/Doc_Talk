@@ -17,6 +17,7 @@ const fileFilter = (req, file, cb) => {
 
     const isPdfMime = mime === "application/pdf" || mime === "application/x-pdf";
     const isPdfByName = name.endsWith(".pdf");
+    // edge case for browser support to the different type of pdf
     const isGenericButPdf = mime === "application/octet-stream" && isPdfByName;
 
     if (isPdfMime || isGenericButPdf) {
